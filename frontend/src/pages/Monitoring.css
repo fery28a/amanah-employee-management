@@ -1,0 +1,274 @@
+/* Container Utama Halaman Monitoring */
+.monitoring-container {
+  padding: 20px;
+  background-color: #f8f9fa; /* Latar belakang abu-abu muda */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sedikit bayangan untuk kedalaman */
+}
+
+.monitoring-container h2 {
+  color: #333; /* Warna teks gelap */
+  margin-bottom: 25px;
+  text-align: center;
+  font-size: 2em; /* Ukuran judul lebih besar */
+}
+
+/* Bagian Pemilih Tanggal (sama seperti Absensi.css, bisa direfaktor) */
+.date-picker-section {
+  margin-bottom: 25px;
+  text-align: center;
+  display: flex; /* Mengatur elemen di tengah */
+  justify-content: center;
+  align-items: center;
+  gap: 15px; /* Jarak antara label dan input */
+  flex-wrap: wrap; /* Agar responsif di layar kecil */
+}
+
+.date-picker-section label {
+  font-weight: bold;
+  color: #555;
+  font-size: 1.1em;
+}
+
+.date-picker-section input[type="date"] {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em;
+  outline: none; /* Hapus outline default saat focus */
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075); /* Sedikit efek cekung */
+}
+
+.date-picker-section input[type="date"]:focus {
+  border-color: #0071CE;
+  box-shadow: 0 0 0 0.2rem rgba(0, 113, 206, 0.25);
+}
+
+.info-message {
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+  color: #004085;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-top: 15px;
+  font-size: 0.9em;
+  text-align: left;
+}
+
+/* Daftar Karyawan yang Dimonitoring */
+.monitored-employees-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+/* Setiap Kartu Karyawan di Monitoring */
+.employee-monitoring-card {
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+.employee-monitoring-card h3 {
+  margin-top: 0;
+  color: #0071CE;
+  font-size: 1.6em;
+  margin-bottom: 12px;
+}
+
+/* Status Tag (sama seperti Absensi.css) */
+/* Tambahkan gaya untuk status 'Sudah Pulang' */
+.status-tag {
+  font-size: 0.95em;
+  padding: 6px 12px;
+  border-radius: 20px;
+  display: inline-block;
+  margin-bottom: 18px;
+  font-weight: normal;
+  text-transform: capitalize;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.status-tag strong {
+  font-weight: bold;
+}
+
+.status-belum-absen { background-color: #e9ecef; color: #495057; } /* Mungkin tidak terlalu dipakai di monitoring */
+.status-hadir { background-color: #d4edda; color: #155724; }
+.status-absen { background-color: #f8d7da; color: #721c24; } /* Mungkin tidak terlalu dipakai di monitoring */
+.status-istirahat { background-color: #fff3cd; color: #856404; }
+.status-sudah-pulang { background-color: #cfe2ff; color: #073a7d; } /* Gaya baru untuk status Pulang */
+
+
+/* Bagian Pekerjaan yang Ditugaskan */
+.assigned-jobs-section {
+  margin-top: 15px;
+}
+
+.assigned-jobs-section h4 {
+  margin-top: 0;
+  margin-bottom: 10px;
+  color: #555;
+  font-size: 1.1em;
+  font-weight: bold;
+}
+
+.job-list-monitoring {
+  list-style: none; /* Hapus bullet default */
+  padding: 0;
+  margin: 0;
+}
+
+.job-list-monitoring li {
+  display: flex; /* Membuat teks dan tombol sejajar */
+  justify-content: space-between; /* Menjauhkan teks dan tombol */
+  align-items: center;
+  background-color: #f0f8ff; /* Latar belakang item pekerjaan */
+  border: 1px solid #cce0f0;
+  border-radius: 5px;
+  padding: 10px 15px;
+  margin-bottom: 8px;
+  font-size: 0.95em;
+  color: #333;
+}
+
+.job-list-monitoring li:last-child {
+  margin-bottom: 0;
+}
+
+.job-list-monitoring li span {
+  flex-grow: 1; /* Teks pekerjaan mengambil sisa ruang */
+  margin-right: 10px;
+}
+
+/* Gaya untuk pekerjaan yang sudah selesai */
+.job-list-monitoring li.job-completed {
+  background-color: #e9f5ed; /* Warna latar belakang lebih terang untuk selesai */
+  border-color: #a7d9b9;
+  text-decoration: line-through; /* Coret teks */
+  color: #777; /* Warna teks lebih pudar */
+}
+
+/* Tombol Tandai Selesai */
+.btn-complete-job {
+  background-color: #0071CE; /* Warna biru konsisten */
+  color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.85em;
+  font-weight: bold;
+  white-space: nowrap; /* Mencegah teks tombol pecah */
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.btn-complete-job:hover:not(:disabled) {
+  background-color: #005aa7;
+}
+
+.btn-complete-job:disabled {
+  background-color: #a0a0a0; /* Abu-abu saat selesai/dinonaktifkan */
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.no-jobs-message, .no-employees-message, .no-completed-jobs {
+  text-align: center;
+  color: #777;
+  padding: 20px;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+/* --- Bagian Baru: Riwayat Pekerjaan yang Diselesaikan --- */
+.completed-jobs-history-section {
+    margin-top: 40px; /* Jarak dari bagian atas */
+    background-color: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.completed-jobs-history-section h3 {
+    color: #0071CE;
+    margin-top: 0;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    text-align: center;
+}
+
+.completed-jobs-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+.completed-jobs-table th,
+.completed-jobs-table td {
+    padding: 12px 15px;
+    border: 1px solid #eee;
+    text-align: left;
+    font-size: 0.95em;
+    vertical-align: top;
+}
+
+.completed-jobs-table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    color: #444;
+}
+
+.completed-jobs-table tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+.completed-jobs-table tbody tr:hover {
+    background-color: #f0f0f0;
+}
+
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+  .monitoring-container {
+    padding: 15px;
+  }
+
+  .monitored-employees-list {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .employee-monitoring-card {
+    padding: 20px;
+  }
+
+  .job-list-monitoring li {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 10px;
+  }
+
+  .job-list-monitoring li span {
+    margin-bottom: 8px;
+    margin-right: 0;
+  }
+
+  .btn-complete-job {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Reduce padding/font size for smaller screens for tables */
+  .completed-jobs-table th, .completed-jobs-table td {
+    padding: 8px 10px;
+    font-size: 0.9em;
+  }
+}

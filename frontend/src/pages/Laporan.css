@@ -1,0 +1,257 @@
+/* Container Utama Halaman Laporan */
+.laporan-container {
+  padding: 20px;
+  background-color: #f8f9fa; /* Latar belakang abu-abu muda */
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Sedikit bayangan untuk kedalaman */
+}
+
+.laporan-container h2 {
+  color: #333; /* Warna teks gelap */
+  margin-bottom: 25px;
+  text-align: center;
+  font-size: 2em; /* Ukuran judul lebih besar */
+}
+
+/* Kontrol Laporan (Pemilih Periode & Karyawan) */
+.report-controls {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-bottom: 30px;
+  flex-wrap: wrap; /* Agar responsif */
+}
+
+.period-selector-section,
+.employee-selector-section {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.report-controls label {
+  font-weight: bold;
+  color: #555;
+  font-size: 1.1em;
+}
+
+.report-controls select {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em;
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.075);
+  background-color: white;
+  cursor: pointer;
+}
+
+.report-controls select:focus {
+  border-color: #0071CE;
+  box-shadow: 0 0 0 0.2rem rgba(0, 113, 206, 0.25);
+}
+
+/* Konten Laporan */
+.report-content {
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  padding: 25px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.report-content h3 {
+  color: #0071CE;
+  margin-top: 0;
+  margin-bottom: 20px;
+  font-size: 1.6em;
+  text-align: center;
+}
+
+/* Tabel Laporan */
+.report-table-container {
+  overflow-x: auto; /* Agar tabel bisa discroll horizontal jika terlalu lebar */
+  margin-bottom: 30px;
+}
+
+.report-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px; /* Lebar minimum agar tidak terlalu sempit di layar kecil */
+}
+
+.report-table th,
+.report-table td {
+  padding: 12px 15px;
+  border: 1px solid #eee;
+  text-align: left;
+  font-size: 0.95em;
+  vertical-align: top;
+}
+
+.report-table th {
+  background-color: #f2f2f2;
+  font-weight: bold;
+  color: #444;
+}
+
+.report-table tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.report-table tbody tr:hover {
+  background-color: #f0f0f0;
+}
+
+/* >>> BARU: Gaya untuk istirahat yang melebihi 50 menit */
+.long-break-warning {
+  background-color: #ffe6e6; /* Merah sangat muda */
+  color: #c82333; /* Teks merah gelap */
+  font-weight: bold;
+}
+
+/* Opsi jika ingin header kolom istirahat berbeda */
+.break-time-header {
+  /* background-color: #ffc107; */ /* Contoh: warna kuning untuk header kolom istirahat */
+  /* color: #333; */
+}
+
+
+/* Ringkasan Laporan */
+.report-summary {
+  background-color: #e6f7ff;
+  border: 1px solid #91d5ff;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.report-summary h4 {
+  color: #0056b3;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.3em;
+  text-align: center;
+}
+
+.report-summary p {
+  margin-bottom: 8px;
+  font-size: 1em;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.report-summary p strong {
+  color: #000;
+}
+
+.report-summary .total-gaji {
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #28a745;
+  border-top: 1px dashed #a7d9b9;
+  padding-top: 10px;
+  margin-top: 15px;
+}
+.report-summary .total-gaji strong {
+  color: #28a745;
+}
+
+.no-selection-message {
+  text-align: center;
+  color: #777;
+  padding: 20px;
+  background-color: #f0f0f0;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+/* >>> BARU: Gaya Tombol Cetak/Unduh */
+.export-buttons-section {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 15px;
+    border-top: 1px dashed #eee;
+}
+
+.export-buttons-section button {
+    background-color: #0071CE;
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, opacity 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.export-buttons-section button:hover:not(:disabled) {
+    background-color: #005aa7;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.export-buttons-section button:disabled {
+    background-color: #a0a0a0;
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.export-buttons-section .btn-export-csv {
+    background-color: #28a745; /* Hijau untuk CSV */
+}
+
+.export-buttons-section .btn-export-csv:hover:not(:disabled) {
+    background-color: #218838;
+}
+
+
+/* Media Queries for Responsiveness */
+@media (max-width: 768px) {
+  .laporan-container {
+    padding: 15px;
+  }
+
+  .report-controls {
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .period-selector-section,
+  .employee-selector-section {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .report-controls select {
+    width: 100%;
+  }
+
+  .report-content {
+    padding: 15px;
+  }
+
+  .report-table th, .report-table td {
+    padding: 8px 10px;
+    font-size: 0.85em;
+  }
+
+  .report-table {
+    min-width: 100%; /* Pastikan tabel tidak tumpang tindih */
+  }
+
+  .export-buttons-section {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .export-buttons-section button {
+    width: 100%;
+  }
+}

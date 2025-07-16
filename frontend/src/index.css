@@ -1,0 +1,5 @@
+/* Anda bisa tambahkan reset CSS dasar di sini jika diperlukan */
+/* Contoh: */
+html, body, #root {
+  height: 100%;
+}

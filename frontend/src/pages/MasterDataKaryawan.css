@@ -1,0 +1,279 @@
+/* Master Data Container */
+.master-data-container {
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.master-data-container h2 {
+  color: #333;
+  margin-bottom: 25px;
+  text-align: center;
+  font-size: 2em;
+}
+
+/* Tombol Tambah Karyawan */
+.btn-add-employee {
+  background-color: #28a745; /* Hijau */
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: bold;
+  display: block; /* Agar tombol mengambil lebar penuh */
+  width: fit-content; /* Sesuaikan lebar dengan konten */
+  margin: 0 auto 30px auto; /* Pusatkan tombol dan beri margin bawah */
+  transition: background-color 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-add-employee:hover {
+  background-color: #218838;
+}
+
+/* Pesan (Loading, Error, Success, Info) */
+.loading-message,
+.error-message,
+.success-message,
+.info-message {
+  text-align: center;
+  padding: 10px 15px;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  font-size: 0.95em;
+}
+
+.loading-message {
+  background-color: #e0f2f7;
+  color: #0056b3;
+  border: 1px solid #a7d9f0;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.info-message {
+  background-color: #f0f0f0;
+  color: #555;
+  border: 1px solid #ddd;
+}
+
+/* Daftar Karyawan (Tabel) */
+.employee-list {
+  overflow-x: auto; /* Agar tabel bisa discroll horizontal jika terlalu lebar */
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.employee-list table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px; /* Lebar minimum agar tidak terlalu sempit di layar kecil */
+}
+
+.employee-list th,
+.employee-list td {
+  padding: 12px 15px;
+  border: 1px solid #eee;
+  text-align: left;
+  font-size: 0.95em;
+  vertical-align: middle; /* Rata tengah vertikal */
+}
+
+.employee-list th {
+  background-color: #e9ecef;
+  color: #333;
+  font-weight: bold;
+}
+
+.employee-list tbody tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.employee-list tbody tr:hover {
+  background-color: #e2e6ea;
+}
+
+/* Kolom Aksi */
+.employee-list .actions {
+  white-space: nowrap; /* Agar tombol tidak pecah baris */
+  text-align: center;
+}
+
+.employee-list .actions button {
+  padding: 8px 12px;
+  margin: 0 5px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.85em;
+  font-weight: bold;
+  transition: background-color 0.2s ease;
+}
+
+.employee-list .btn-edit {
+  background-color: #007bff; /* Biru */
+  color: white;
+}
+.employee-list .btn-edit:hover {
+  background-color: #0056b3;
+}
+
+.employee-list .btn-delete {
+  background-color: #dc3545; /* Merah */
+  color: white;
+}
+.employee-list .btn-delete:hover {
+  background-color: #bd2130;
+}
+
+
+/* Modal Styles (untuk form tambah/edit) */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  width: 90%;
+  max-width: 550px;
+  position: relative;
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  color: #0071CE;
+  margin-bottom: 25px;
+  text-align: center;
+  font-size: 1.8em;
+}
+
+.modal-content .form-group {
+  margin-bottom: 18px;
+}
+
+.modal-content label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #555;
+  font-size: 0.95em;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="number"] {
+  width: calc(100% - 24px); /* Penuh lebar dikurangi padding */
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 1em;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.modal-content input[type="text"]:focus,
+.modal-content input[type="number"]:focus {
+  border-color: #0071CE;
+  box-shadow: 0 0 0 0.2rem rgba(0, 113, 206, 0.25);
+}
+
+.modal-content input:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.modal-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: bold;
+  transition: background-color 0.3s ease, opacity 0.3s ease;
+}
+
+.modal-actions .btn-save {
+  background-color: #28a745;
+  color: white;
+}
+.modal-actions .btn-save:hover:not(:disabled) {
+  background-color: #218838;
+}
+
+.modal-actions .btn-cancel {
+  background-color: #6c757d;
+  color: white;
+}
+.modal-actions .btn-cancel:hover:not(:disabled) {
+  background-color: #5a6268;
+}
+
+.modal-actions button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+
+/* Responsiveness */
+@media (max-width: 768px) {
+  .master-data-container {
+    padding: 15px;
+  }
+  .employee-list table {
+    min-width: unset; /* Hapus min-width di mobile jika tabel sudah overflow-x */
+  }
+  .employee-list th, .employee-list td {
+    padding: 10px;
+    font-size: 0.9em;
+  }
+  .modal-content {
+    padding: 20px;
+  }
+  .modal-content h3 {
+    font-size: 1.5em;
+  }
+  .modal-content input[type="text"],
+  .modal-content input[type="number"] {
+    padding: 10px;
+    width: calc(100% - 20px);
+  }
+  .modal-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+  .modal-actions button {
+    width: 100%;
+  }
+}
