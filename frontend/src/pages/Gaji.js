@@ -2,7 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './Gaji.css';
 
-const API_BASE_URL = 'http://10.10.10.100:5001/api';
+const API_BASE_URL = 'http://localhost:5051/api'; // URL dasar API backend Anda
+
 // Fungsi helper untuk mendapatkan jumlah hari dalam bulan tertentu
 const getDaysInMonth = (year, month) => {
   return new Date(year, month, 0).getDate();
@@ -10,7 +11,7 @@ const getDaysInMonth = (year, month) => {
 
 const Gaji = () => {
   const today = new Date();
-  const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1);
+  const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1); // 1-12
   const [selectedYear, setSelectedYear] = useState(today.getFullYear());
 
   const [karyawanList, setKaryawanList] = useState([]);
@@ -25,13 +26,14 @@ const Gaji = () => {
     setPaymentHistory(storedHistory);
   }, []);
 
+  // --- Ambil Daftar Karyawan dari Backend ---
   useEffect(() => {
     const fetchEmployees = async () => {
       setLoading(true);
       setError(null);
       try {
         const response = await axios.get(`${API_BASE_URL}/employees`);
-        setKaryawanList(response.data);
+        setKaryawanList(response.data); // Data karyawan sudah termasuk gajiPerJam dan uangMakanHarian
       } catch (err) {
         console.error('Error fetching employees for salary:', err);
         setError('Gagal memuat daftar karyawan untuk perhitungan gaji.');
@@ -40,8 +42,9 @@ const Gaji = () => {
       }
     };
     fetchEmployees();
-  }, []);
+  }, []); // Hanya berjalan sekali saat mount
 
+  // Fungsi untuk menghitung gaji per karyawan (diperbarui untuk mengambil data dari backend)
   const calculateEmployeeSalary = useCallback(async (employee, month, year) => {
     let allMonthAttendance = [];
     try {
@@ -60,13 +63,13 @@ const Gaji = () => {
             totalCompletedJobs: 0,
             totalDaysPresent: 0,
             totalDaysAbsent: 0,
-            totalUangMakan: 0,
+            totalUangMakan: 0, // Inisialisasi total uang makan
             gajiBersihDihitung: 0,
         };
     }
 
-    let totalWorkingDurationMs = 0;
-    let totalBreakDurationMs = 0;
+    let totalWorkingDurationMs = 0; // Ini akan menjadi total durasi dari masuk sampai pulang
+    let totalBreakDurationMs = 0; // Tetap hitung total istirahat untuk informasi
     let totalCompletedJobs = 0;
     let totalDaysPresent = 0;
     let totalDaysAbsent = 0;
@@ -82,12 +85,12 @@ const Gaji = () => {
         if (absensiData.jamMasuk && absensiData.jamPulang) {
           const masukTime = new Date(absensiData.jamMasuk).getTime();
           const pulangTime = new Date(absensiData.jamPulang).getTime();
-          let effectiveWorkingTime = pulangTime - masukTime;
-
-          const dayTotalBreakMs = absensiData.totalIstirahatDurasi || 0;
-          effectiveWorkingTime -= dayTotalBreakMs;
-          totalBreakDurationMs += dayTotalBreakMs;
-          totalWorkingDurationMs += effectiveWorkingTime;
+          
+          // >>> PERUBAHAN UTAMA DI SINI: Waktu istirahat TIDAK DIKURANGI dari jam kerja
+          let grossWorkingTime = pulangTime - masukTime; 
+          
+          totalWorkingDurationMs += grossWorkingTime; // Tambahkan total durasi masuk-pulang
+          totalBreakDurationMs += absensiData.totalIstirahatDurasi || 0; // Tetap akumulasi durasi istirahat
         }
       } else if (absensiData.status === 'Absen') {
         totalDaysAbsent++;
@@ -102,15 +105,15 @@ const Gaji = () => {
       }
     });
 
-    const totalWorkingHoursFloat = totalWorkingDurationMs / (1000 * 60 * 60);
+    const totalWorkingHoursFloat = totalWorkingDurationMs / (1000 * 60 * 60); // Ini sekarang adalah jam kotor
     const totalBreakMinutes = Math.floor(totalBreakDurationMs / (1000 * 60));
     const breakHours = Math.floor(totalBreakMinutes / 60);
     const breakMinutes = totalBreakMinutes % 60;
 
-    const gajiPerJam = employee.gajiPerJam ?? 0; // Fallback ke 0
-    const uangMakanHarian = employee.uangMakanHarian ?? 0; // Fallback ke 0
+    const gajiPerJam = employee.gajiPerJam ?? 0;
+    const uangMakanHarian = employee.uangMakanHarian ?? 0;
 
-    const gajiBersihJamKerja = totalWorkingHoursFloat * gajiPerJam;
+    const gajiBersihJamKerja = totalWorkingHoursFloat * gajiPerJam; // Gaji dari jam kotor
     const totalUangMakan = totalDaysPresent * uangMakanHarian;
 
     const gajiBersihDihitung = Math.round(gajiBersihJamKerja + totalUangMakan);
@@ -179,8 +182,8 @@ const Gaji = () => {
       employeeId: employeeId,
       employeeName: employeeName,
       period: period,
-      baseSalary: calculatedBaseSalary - totalUangMakan, // Simpan gaji pokok murni
-      uangMakan: totalUangMakan, // Simpan uang makan terpisah
+      baseSalary: calculatedBaseSalary - totalUangMakan,
+      uangMakan: totalUangMakan,
       bonus: bonusAmount,
       amountPaid: totalAmountPaid,
       paymentDate: paymentDate,
@@ -246,7 +249,6 @@ const Gaji = () => {
                   <h3>{data.namaLengkap}</h3>
                   <div className="salary-details">
                     <h4>Rincian Periode {new Date(selectedYear, selectedMonth - 1).toLocaleString('id-ID', { month: 'long' })} {selectedYear}:</h4>
-                    {/* >>> PERBAIKAN: Gunakan optional chaining dan fallback untuk tampilan */}
                     <p>Gaji per Jam: <strong>Rp {(data.gajiPerJam ?? 0).toLocaleString('id-ID')}</strong></p>
                     <p>Uang Makan Harian: <strong>Rp {(data.uangMakanHarian ?? 0).toLocaleString('id-ID')}</strong></p>
                     <p>Total Jam Kerja Efektif: <strong>{data.totalWorkingDuration.hours} jam {data.totalWorkingDuration.minutes} menit</strong></p>
@@ -298,7 +300,6 @@ const Gaji = () => {
                 <tr key={record.id}>
                   <td>{record.employeeName}</td>
                   <td>{record.period}</td>
-                  {/* >>> PERBAIKAN: Gunakan optional chaining dan fallback untuk tampilan */}
                   <td>Rp {(record.baseSalary ?? 0).toLocaleString('id-ID')}</td>
                   <td>Rp {(record.uangMakan ?? 0).toLocaleString('id-ID')}</td>
                   <td>Rp {(record.bonus ?? 0).toLocaleString('id-ID')}</td>

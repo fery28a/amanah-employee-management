@@ -4,7 +4,7 @@ import axios from 'axios';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, Legend, CartesianGrid, ResponsiveContainer } from 'recharts';
 import './Dashboard.css';
 
-const API_BASE_URL = 'http://10.10.10.100:5001/api';
+const API_BASE_URL = 'http://localhost:5051/api';
 
 // Fungsi helper untuk mendapatkan tanggal hari ini dalam format YYYY-MM-DD
 const getTodayDate = () => {

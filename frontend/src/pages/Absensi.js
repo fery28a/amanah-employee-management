@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './Absensi.css'; // Pastikan file CSS ini diupdate dengan yang baru
 
-const API_BASE_URL = 'http://10.10.10.100:5001/api';
+const API_BASE_URL = 'http://localhost:5051/api'; // URL dasar API backend Anda
 
 // Fungsi utilitas untuk format tanggal YYYY-MM-DD
 const getTodayDate = () => {
@@ -41,7 +41,7 @@ const Absensi = () => {
 
   const [newPekerjaanText, setNewPekerjaanText] = useState({});
   
-  // >>> PERUBAHAN: Untuk tabel riwayat absensi harian di bawah
+  // >>> STATE BARU: Untuk tabel riwayat absensi harian di bawah
   const [dailyAttendanceHistory, setDailyAttendanceHistory] = useState([]);
 
   // --- Ambil Daftar Karyawan ---
@@ -240,6 +240,7 @@ const Absensi = () => {
   };
 
   // Handler ini tidak lagi digunakan di Absensi karena list pekerjaan dihilangkan
+  // Namun, tetap ada jika ada elemen UI lain yang menggunakannya untuk marking/deleting.
   const handleTogglePekerjaan = async (employeeId, currentAttendanceData, index) => {
     const updatedPekerjaan = [...(Array.isArray(currentAttendanceData?.pekerjaan) ? currentAttendanceData.pekerjaan : [])];
     const item = updatedPekerjaan[index];
@@ -276,7 +277,6 @@ const Absensi = () => {
   };
 
   // --- BARU: Update Riwayat Absensi Harian untuk Tabel di Bawah ---
-  // Fungsi ini dipanggil setiap kali allAttendanceData berubah
   useEffect(() => {
     const createDailyHistory = () => {
       const history = allAttendanceData.map(att => {
@@ -292,8 +292,7 @@ const Absensi = () => {
           jamMasuk: formatTime(att.jamMasuk),
           jamPulang: formatTime(att.jamPulang),
           jamIstirahat: att.status === 'Istirahat' ? 'Sedang Istirahat' : (totalIstirahatMinutes > 0 ? `${hours} jam ${minutes} menit` : '-'),
-          // >>> PERUBAHAN UTAMA DI SINI: Menyimpan array pekerjaan agar bisa dirender sebagai list
-          pekerjaan: Array.isArray(att.pekerjaan) && att.pekerjaan.length > 0 ? att.pekerjaan.map(p => p.text) : [], // Simpan array teks
+          pekerjaan: Array.isArray(att.pekerjaan) && att.pekerjaan.length > 0 ? att.pekerjaan.map(p => p.text).join(', ') : '-',
         };
       });
       setDailyAttendanceHistory(history);
@@ -421,45 +420,32 @@ const Absensi = () => {
       <div className="daily-history">
         <h3>Riwayat Absensi Karyawan Hari Ini ({selectedDate})</h3>
         {dailyAttendanceHistory.length > 0 ? (
-          <div className="table-responsive"> {/* Tambah div ini untuk scroll horizontal */}
-            <table className="daily-history-table">
-              <thead>
-                <tr>
-                  <th>Nama Karyawan</th>
-                  <th>Status Absensi</th>
-                  <th>Terakhir Diperbarui</th>
-                  <th>Jam Masuk</th>
-                  <th>Jam Pulang</th>
-                  <th>Total Istirahat</th>
-                  <th>Pekerjaan</th>
+          <table className="daily-history-table"> {/* Class baru untuk tabel ini */}
+            <thead>
+              <tr>
+                <th>Nama Karyawan</th>
+                <th>Status Absensi</th>
+                <th>Terakhir Diperbarui</th>
+                <th>Jam Masuk</th>
+                <th>Jam Pulang</th>
+                <th>Total Istirahat</th>
+                <th>Pekerjaan</th>
+              </tr>
+            </thead>
+            <tbody>
+              {dailyAttendanceHistory.map((entry, index) => (
+                <tr key={entry.nama + index}>
+                  <td>{entry.nama}</td>
+                  <td>{entry.status}</td>
+                  <td>{entry.waktuUpdate}</td>
+                  <td>{entry.jamMasuk}</td>
+                  <td>{entry.jamPulang}</td>
+                  <td>{entry.jamIstirahat}</td>
+                  <td>{entry.pekerjaan}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {dailyAttendanceHistory.map((entry, index) => (
-                  <tr key={entry.nama + index}>
-                    <td>{entry.nama}</td>
-                    <td>{entry.status}</td>
-                    <td>{entry.waktuUpdate}</td>
-                    <td>{entry.jamMasuk}</td>
-                    <td>{entry.jamPulang}</td>
-                    <td>{entry.jamIstirahat}</td>
-                    <td>
-                      {/* >>> PERUBAHAN UTAMA DI SINI: Render pekerjaan sebagai list */}
-                      {Array.isArray(entry.pekerjaan) && entry.pekerjaan.length > 0 ? (
-                        <ul className="job-list-table-history"> {/* Class baru untuk list di tabel */}
-                          {entry.pekerjaan.map((jobText, idx) => (
-                            <li key={idx}>{jobText}</li>
-                          ))}
-                        </ul>
-                      ) : (
-                        '-'
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         ) : (
           <p className="info-message">Belum ada riwayat absensi untuk hari ini.</p>
         )}
