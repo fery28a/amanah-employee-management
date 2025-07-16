@@ -2,8 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './Gaji.css';
 
-const API_BASE_URL = 'http://localhost:5051/api';
-
+const API_BASE_URL = 'http://10.10.10.100:5001/api';
 // Fungsi helper untuk mendapatkan jumlah hari dalam bulan tertentu
 const getDaysInMonth = (year, month) => {
   return new Date(year, month, 0).getDate();

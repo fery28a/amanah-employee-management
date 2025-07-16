@@ -7,7 +7,7 @@ import * as XLSX from 'xlsx'; // Import library XLSX
 
 import './Laporan.css';
 
-const API_BASE_URL = 'http://localhost:5051/api'; // URL dasar API backend Anda
+const API_BASE_URL = 'http://10.10.10.100:5001/api';// URL dasar API backend Anda
 
 // Fungsi helper untuk mendapatkan jumlah hari dalam bulan tertentu
 const getDaysInMonth = (year, month) => {

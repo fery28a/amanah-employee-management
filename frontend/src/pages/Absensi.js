@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import './Absensi.css'; // Pastikan file CSS ini diupdate dengan yang baru
 
-const API_BASE_URL = 'http://localhost:5051/api'; // URL dasar API backend Anda
+const API_BASE_URL = 'http://10.10.10.100:5001/api';
 
 // Fungsi utilitas untuk format tanggal YYYY-MM-DD
 const getTodayDate = () => {
