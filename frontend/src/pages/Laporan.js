@@ -1,31 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import axios from 'axios'; // Import axios
-import * as XLSX from 'xlsx'; // Import library XLSX
-// Hapus import jsPDF dan jspdf-autotable jika tidak digunakan lagi
-// import jsPDF from 'jspdf';
-// import 'jspdf-autotable';
+import axios from 'axios';
+import * as XLSX from 'xlsx';
 
 import './Laporan.css';
 
-const API_BASE_URL = 'http://10.10.10.100:3001/api'; // URL dasar API backend Anda
+const API_BASE_URL = 'http://localhost:5051/api';
 
-// Fungsi helper untuk mendapatkan jumlah hari dalam bulan tertentu
 const getDaysInMonth = (year, month) => {
   return new Date(year, month, 0).getDate();
 };
 
 const Laporan = () => {
   const today = new Date();
-  const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1); // 1-12
+  const [selectedMonth, setSelectedMonth] = useState(today.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState(today.getFullYear());
-  const [selectedEmployeeId, setSelectedEmployeeId] = useState(''); // Untuk memilih karyawan
+  const [selectedEmployeeId, setSelectedEmployeeId] = useState('');
 
-  // State untuk daftar karyawan dari backend
-  const [karyawanList, setKaryawanList] = useState([]); // Inisialisasi kosong
+  const [karyawanList, setKaryawanList] = useState([]);
 
-  // State untuk menyimpan data laporan per hari
   const [reportData, setReportData] = useState([]);
-  // State untuk menyimpan ringkasan total
   const [summaryData, setSummaryData] = useState({
     totalWorkingDays: 0,
     totalAbsentDays: 0,
@@ -38,7 +31,6 @@ const Laporan = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // --- Ambil Daftar Karyawan dari Backend ---
   useEffect(() => {
     const fetchEmployees = async () => {
       setLoading(true);
@@ -46,7 +38,6 @@ const Laporan = () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/employees`);
         setKaryawanList(response.data);
-        // Set default selected employee to the first one if list is not empty
         if (response.data.length > 0) {
           setSelectedEmployeeId(response.data[0]._id);
         }
@@ -58,30 +49,42 @@ const Laporan = () => {
       }
     };
     fetchEmployees();
-  }, []); // Hanya berjalan sekali saat mount
+  }, []);
 
-  // Fungsi untuk menghasilkan laporan (diperbarui untuk mengambil data dari backend)
   const generateReport = useCallback(async () => {
     if (!selectedEmployeeId || karyawanList.length === 0) {
       setReportData([]);
-      setSummaryData({ /* reset */ });
+      setSummaryData({
+        totalWorkingDays: 0,
+        totalAbsentDays: 0,
+        totalClockOutDays: 0,
+        totalWorkingHours: { hours: 0, minutes: 0 },
+        totalBreakHours: { hours: 0, minutes: 0 },
+        overallPayableSalary: 0,
+      });
       return;
     }
 
     setLoading(true);
     setError(null);
-    
+
     try {
       const employee = karyawanList.find(k => k._id === selectedEmployeeId);
       if (!employee) {
         setError('Karyawan tidak ditemukan.');
         setReportData([]);
-        setSummaryData({ /* reset */ });
+        setSummaryData({
+          totalWorkingDays: 0,
+          totalAbsentDays: 0,
+          totalClockOutDays: 0,
+          totalWorkingHours: { hours: 0, minutes: 0 },
+          totalBreakHours: { hours: 0, minutes: 0 },
+          overallPayableSalary: 0,
+        });
         setLoading(false);
         return;
       }
 
-      // Ambil semua catatan absensi untuk bulan ini dari backend
       const response = await axios.get(`${API_BASE_URL}/attendance/bymonth/${selectedYear}/${selectedMonth}`);
       const allMonthAttendanceRecords = response.data;
 
@@ -89,7 +92,7 @@ const Laporan = () => {
       let totalWorkingDays = 0;
       let totalAbsentDays = 0;
       let totalClockOutDays = 0;
-      let totalWorkingDurationMsOverall = 0;
+      let totalEffectiveWorkingDurationMsOverall = 0; // For effective work hours summary
       let totalBreakDurationMsOverall = 0;
       let overallPayableSalary = 0;
 
@@ -97,7 +100,6 @@ const Laporan = () => {
 
       for (let day = 1; day <= daysInMonth; day++) {
         const dateString = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-        // Cari catatan absensi untuk karyawan dan tanggal ini dari data yang sudah diambil
         const absensiData = allMonthAttendanceRecords.find(att =>
           att.date === dateString && (att.employee?._id || att.employee) === employee._id
         );
@@ -106,7 +108,8 @@ const Laporan = () => {
         let jamMasuk = '-';
         let jamPulang = '-';
         let istirahatDurasi = '0 jam 0 menit';
-        let totalJamKerjaHarian = '0 jam 0 menit';
+        let totalJamKerjaHarian = '0 jam 0 menit'; // This will represent effective work duration
+        let totalDurationClockInToOutHarian = '0 jam 0 menit'; // New: For salary calculation
         let gajiHarian = 0;
         let isLongBreak = false;
 
@@ -115,27 +118,39 @@ const Laporan = () => {
           jamMasuk = absensiData.jamMasuk ? new Date(absensiData.jamMasuk).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-';
           jamPulang = absensiData.jamPulang ? new Date(absensiData.jamPulang).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-';
 
-          let dailyWorkingDurationMs = 0;
+          let dailyEffectiveWorkingDurationMs = 0; // Duration excluding breaks
+          let dailyTotalClockInToOutDurationMs = 0; // Total duration from clock-in to clock-out
           let dailyBreakDurationMs = absensiData.totalIstirahatDurasi || 0;
           totalBreakDurationMsOverall += dailyBreakDurationMs;
 
           if (Math.floor(dailyBreakDurationMs / (1000 * 60)) > 50) {
-              isLongBreak = true;
+            isLongBreak = true;
           }
 
           if (absensiData.jamMasuk && absensiData.jamPulang) {
             const masukTime = new Date(absensiData.jamMasuk).getTime();
             const pulangTime = new Date(absensiData.jamPulang).getTime();
-            dailyWorkingDurationMs = pulangTime - masukTime - dailyBreakDurationMs;
-            totalWorkingDurationMsOverall += dailyWorkingDurationMs;
 
-            const dailyWorkingMinutes = Math.floor(dailyWorkingDurationMs / (1000 * 60));
-            const hours = Math.floor(dailyWorkingMinutes / 60);
-            const minutes = dailyWorkingMinutes % 60;
-            totalJamKerjaHarian = `${hours} jam ${minutes} menit`;
+            dailyTotalClockInToOutDurationMs = pulangTime - masukTime; // Total time spent at work
+            dailyEffectiveWorkingDurationMs = dailyTotalClockInToOutDurationMs - dailyBreakDurationMs; // Effective working time
 
-            const dailyWorkingHoursFloat = dailyWorkingDurationMs / (1000 * 60 * 60);
-            gajiHarian = Math.round(dailyWorkingHoursFloat * employee.gajiPerJam);
+            totalEffectiveWorkingDurationMsOverall += dailyEffectiveWorkingDurationMs;
+
+            const dailyEffectiveWorkingMinutes = Math.floor(dailyEffectiveWorkingDurationMs / (1000 * 60));
+            const effectiveHours = Math.floor(dailyEffectiveWorkingMinutes / 60);
+            const effectiveMinutes = dailyEffectiveWorkingMinutes % 60;
+            totalJamKerjaHarian = `${effectiveHours} jam ${effectiveMinutes} menit`;
+
+            // Calculate duration from clock-in to clock-out for salary
+            const dailyTotalDurationMinutes = Math.floor(dailyTotalClockInToOutDurationMs / (1000 * 60));
+            const totalHours = Math.floor(dailyTotalDurationMinutes / 60);
+            const totalMinutes = dailyTotalDurationMinutes % 60;
+            totalDurationClockInToOutHarian = `${totalHours} jam ${totalMinutes} menit`;
+
+            // *** Gaji Harian Calculation Change ***
+            // Use total duration from clock-in to clock-out for salary calculation
+            const dailySalaryHoursFloat = dailyTotalClockInToOutDurationMs / (1000 * 60 * 60);
+            gajiHarian = Math.round(dailySalaryHoursFloat * employee.gajiPerJam);
             overallPayableSalary += gajiHarian;
 
             totalClockOutDays++;
@@ -152,7 +167,6 @@ const Laporan = () => {
             totalAbsentDays++;
           }
         } else {
-          // Jika tidak ada data absensi untuk hari itu, anggap absen
           status = 'Tidak Tercatat (Absen)';
           totalAbsentDays++;
         }
@@ -164,14 +178,15 @@ const Laporan = () => {
           jamPulang: jamPulang,
           istirahatDurasi: istirahatDurasi,
           isLongBreak: isLongBreak,
-          totalJamKerjaHarian: totalJamKerjaHarian,
+          totalJamKerjaHarian: totalJamKerjaHarian, // This is still effective working time for display
+          totalDurationClockInToOutHarian: totalDurationClockInToOutHarian, // New field for display if needed
           gajiHarian: gajiHarian,
         });
       }
 
-      const totalWorkingMinutesOverall = Math.floor(totalWorkingDurationMsOverall / (1000 * 60));
-      const overallWorkingHours = Math.floor(totalWorkingMinutesOverall / 60);
-      const overallWorkingMinutes = totalWorkingMinutesOverall % 60;
+      const totalEffectiveWorkingMinutesOverall = Math.floor(totalEffectiveWorkingDurationMsOverall / (1000 * 60));
+      const overallEffectiveWorkingHours = Math.floor(totalEffectiveWorkingMinutesOverall / 60);
+      const overallEffectiveWorkingMinutes = totalEffectiveWorkingMinutesOverall % 60;
 
       const totalBreakMinutesOverall = Math.floor(totalBreakDurationMsOverall / (1000 * 60));
       const overallBreakHours = Math.floor(totalBreakMinutesOverall / 60);
@@ -182,7 +197,7 @@ const Laporan = () => {
         totalWorkingDays: totalWorkingDays,
         totalAbsentDays: totalAbsentDays,
         totalClockOutDays: totalClockOutDays,
-        totalWorkingHours: { hours: overallWorkingHours, minutes: overallWorkingMinutes },
+        totalWorkingHours: { hours: overallEffectiveWorkingHours, minutes: overallEffectiveWorkingMinutes }, // This remains effective working hours
         totalBreakHours: { hours: overallBreakHours, minutes: overallBreakMinutes },
         overallPayableSalary: Math.round(overallPayableSalary),
       });
@@ -191,24 +206,28 @@ const Laporan = () => {
       console.error('Error generating report:', err.response?.data || err);
       setError('Gagal memuat laporan. Silakan coba lagi.');
       setReportData([]);
-      setSummaryData({ /* reset */ });
+      setSummaryData({
+        totalWorkingDays: 0,
+        totalAbsentDays: 0,
+        totalClockOutDays: 0,
+        totalWorkingHours: { hours: 0, minutes: 0 },
+        totalBreakHours: { hours: 0, minutes: 0 },
+        overallPayableSalary: 0,
+      });
     } finally {
       setLoading(false);
     }
-  }, [selectedEmployeeId, selectedMonth, selectedYear, karyawanList]); // Tambah karyawanList sebagai dependensi
+  }, [selectedEmployeeId, selectedMonth, selectedYear, karyawanList]);
 
-  // Panggil generateReport setiap kali parameter berubah
   useEffect(() => {
-    // Pastikan karyawanList sudah dimuat sebelum generateReport dipanggil
     if (karyawanList.length > 0 && selectedEmployeeId) {
       generateReport();
     }
-  }, [generateReport, karyawanList, selectedEmployeeId]); // Tambah karyawanList dan selectedEmployeeId ke dependensi
+  }, [generateReport, karyawanList, selectedEmployeeId]);
 
   const selectedEmployeeName = karyawanList.find(k => k._id === selectedEmployeeId)?.namaLengkap || 'Pilih Karyawan';
   const selectedEmployeeGajiPerJam = karyawanList.find(k => k._id === selectedEmployeeId)?.gajiPerJam || 0;
 
-  // Fungsi untuk Cetak PDF (menggunakan window.print())
   const handleExportPdf = () => {
     if (!selectedEmployeeId || reportData.length === 0) {
       alert("Silakan pilih karyawan dan periode dengan data untuk mencetak laporan.");
@@ -217,7 +236,6 @@ const Laporan = () => {
     window.print();
   };
 
-  // Fungsi untuk Export XLSX
   const handleExportXlsx = () => {
     if (reportData.length === 0 && !selectedEmployeeId) {
       alert("Tidak ada data laporan untuk diunduh.");
@@ -229,7 +247,8 @@ const Laporan = () => {
     // --- Sheet 1: Laporan Harian ---
     const dailyHeaders = [
       "Tanggal", "Status", "Jam Masuk", "Jam Pulang", "Total Istirahat",
-      "Total Jam Kerja", "Gaji Harian"
+      "Total Jam Kerja Efektif", // Renamed for clarity in Excel
+      "Gaji Harian"
     ];
     const dailyData = reportData.map(record => [
       record.date,
@@ -237,8 +256,8 @@ const Laporan = () => {
       record.jamMasuk,
       record.jamPulang,
       record.istirahatDurasi,
-      record.totalJamKerjaHarian,
-      record.gajiHarian // Biarkan sebagai angka untuk Excel
+      record.totalJamKerjaHarian, // This is still effective working time
+      record.gajiHarian
     ]);
 
     const dailyWsData = [dailyHeaders, ...dailyData];
@@ -247,17 +266,17 @@ const Laporan = () => {
 
     // --- Sheet 2: Ringkasan Total ---
     const summaryDataForSheet = [
-        ["Ringkasan Total"],
-        ["Item", "Nilai"],
-        ["Nama Karyawan", selectedEmployeeName],
-        ["Periode", `${new Date(selectedYear, selectedMonth - 1).toLocaleString('id-ID', { month: 'long', year: 'numeric' })}`],
-        ["Gaji per Jam", selectedEmployeeGajiPerJam], // Pastikan ini angka jika ingin format di Excel
-        ["Jumlah Hari Kerja (Hadir/Pulang)", `${summaryData.totalWorkingDays} hari`],
-        ["Jumlah Hari Absen (Tidak Tercatat/Absen)", `${summaryData.totalAbsentDays} hari`],
-        ["Jumlah Hari Tercatat Pulang", `${summaryData.totalClockOutDays} hari`],
-        ["Total Jam Kerja Efektif", `${summaryData.totalWorkingHours.hours} jam ${summaryData.totalWorkingHours.minutes} menit`],
-        ["Total Waktu Istirahat", `${summaryData.totalBreakHours.hours} jam ${summaryData.totalBreakHours.minutes} menit`],
-        ["Total Gaji Keseluruhan (Periode Ini)", summaryData.overallPayableSalary] // Biarkan angka
+      ["Ringkasan Total"],
+      ["Item", "Nilai"],
+      ["Nama Karyawan", selectedEmployeeName],
+      ["Periode", `${new Date(selectedYear, selectedMonth - 1).toLocaleString('id-ID', { month: 'long', year: 'numeric' })}`],
+      ["Gaji per Jam", selectedEmployeeGajiPerJam],
+      ["Jumlah Hari Kerja (Hadir/Pulang)", `${summaryData.totalWorkingDays} hari`],
+      ["Jumlah Hari Absen (Tidak Tercatat/Absen)", `${summaryData.totalAbsentDays} hari`],
+      ["Jumlah Hari Tercatat Pulang", `${summaryData.totalClockOutDays} hari`],
+      ["Total Jam Kerja Efektif", `${summaryData.totalWorkingHours.hours} jam ${summaryData.totalWorkingHours.minutes} menit`],
+      ["Total Waktu Istirahat", `${summaryData.totalBreakHours.hours} jam ${summaryData.totalBreakHours.minutes} menit`],
+      ["Total Gaji Keseluruhan (Periode Ini)", summaryData.overallPayableSalary]
     ];
     const summaryWs = XLSX.utils.aoa_to_sheet(summaryDataForSheet);
 
@@ -337,7 +356,7 @@ const Laporan = () => {
       {!loading && !error && selectedEmployeeId && (
         <div className="report-content">
           <h3>Laporan untuk {selectedEmployeeName} - {new Date(selectedYear, selectedMonth - 1).toLocaleString('id-ID', { month: 'long' })} {selectedYear}</h3>
-          
+
           <div className="report-table-container">
             <table className="report-table">
               <thead>
@@ -347,7 +366,7 @@ const Laporan = () => {
                   <th>Jam Masuk</th>
                   <th>Jam Pulang</th>
                   <th className="break-time-header">Total Istirahat</th>
-                  <th>Total Jam Kerja</th>
+                  <th>Total Jam Kerja Efektif</th> {/* Changed header text */}
                   <th>Gaji Harian</th>
                 </tr>
               </thead>
@@ -359,7 +378,7 @@ const Laporan = () => {
                     <td>{record.jamMasuk}</td>
                     <td>{record.jamPulang}</td>
                     <td className={record.isLongBreak ? 'long-break-warning' : ''}>{record.istirahatDurasi}</td>
-                    <td>{record.totalJamKerjaHarian}</td>
+                    <td>{record.totalJamKerjaHarian}</td> {/* This still displays effective work */}
                     <td>Rp {record.gajiHarian.toLocaleString('id-ID')}</td>
                   </tr>
                 ))}
