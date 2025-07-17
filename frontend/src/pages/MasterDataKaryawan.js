@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './MasterDataKaryawan.css';
-const API_BASE_URL = 'http://localhost:5051/api';
+const API_BASE_URL = 'http://10.10.10.100:3001/api';
 
 const MasterData = () => {
   const [employees, setEmployees] = useState([]);
