@@ -247,7 +247,7 @@ const Laporan = () => {
     // --- Sheet 1: Laporan Harian ---
     const dailyHeaders = [
       "Tanggal", "Status", "Jam Masuk", "Jam Pulang", "Total Istirahat",
-      "Total Jam Kerja Efektif", // Renamed for clarity in Excel
+      "Total Jam Kerja (Masuk - Pulang)", // Renamed for clarity in Excel
       "Gaji Harian"
     ];
     const dailyData = reportData.map(record => [
@@ -274,7 +274,7 @@ const Laporan = () => {
       ["Jumlah Hari Kerja (Hadir/Pulang)", `${summaryData.totalWorkingDays} hari`],
       ["Jumlah Hari Absen (Tidak Tercatat/Absen)", `${summaryData.totalAbsentDays} hari`],
       ["Jumlah Hari Tercatat Pulang", `${summaryData.totalClockOutDays} hari`],
-      ["Total Jam Kerja Efektif", `${summaryData.totalWorkingHours.hours} jam ${summaryData.totalWorkingHours.minutes} menit`],
+      ["Total Jam Kerja (Masuk - Pulang)", `${summaryData.totalWorkingHours.hours} jam ${summaryData.totalWorkingHours.minutes} menit`],
       ["Total Waktu Istirahat", `${summaryData.totalBreakHours.hours} jam ${summaryData.totalBreakHours.minutes} menit`],
       ["Total Gaji Keseluruhan (Periode Ini)", summaryData.overallPayableSalary]
     ];
@@ -366,7 +366,7 @@ const Laporan = () => {
                   <th>Jam Masuk</th>
                   <th>Jam Pulang</th>
                   <th className="break-time-header">Total Istirahat</th>
-                  <th>Total Jam Kerja Efektif</th> {/* Changed header text */}
+                  <th>Total Jam Kerja (Masuk - Pulang)</th> {/* Changed header text */}
                   <th>Gaji Harian</th>
                 </tr>
               </thead>
